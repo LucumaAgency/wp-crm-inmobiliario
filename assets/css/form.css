@@ -1,0 +1,28 @@
+/*
+ * CSS mínimo y desactivable (shortcode con estilo="no").
+ * El formulario debe verse como el sitio, no como el plugin: por eso no hay colores de
+ * marca, ni tipografías, ni sombras. Solo estructura y estados.
+ */
+.lcrm-form { max-width: 100%; }
+.lcrm-field { margin-bottom: 14px; }
+.lcrm-label { display: block; margin-bottom: 5px; font-weight: 600; }
+.lcrm-req { margin-left: 2px; }
+.lcrm-input { width: 100%; padding: 10px 12px; font: inherit; }
+.lcrm-help { display: block; margin-top: 4px; opacity: .7; font-size: .875em; }
+.lcrm-field-error { display: block; margin-top: 4px; font-size: .875em; }
+.lcrm-consent { display: flex; gap: 8px; align-items: flex-start; font-size: .9em; line-height: 1.45; }
+.lcrm-consent input { margin-top: 3px; flex: 0 0 auto; }
+.lcrm-radios { display: flex; flex-direction: column; gap: 6px; }
+.lcrm-radio, .lcrm-checkbox { display: flex; gap: 8px; align-items: center; }
+.lcrm-submit { padding: 11px 22px; font: inherit; cursor: pointer; }
+.lcrm-submit[disabled] { opacity: .6; cursor: default; }
+.lcrm-message { margin-top: 12px; }
+.lcrm-message-error { color: #b32d2e; }
+.lcrm-message-exito { font-weight: 600; }
+
+/* Honeypot: fuera de la vista sin usar display:none, que algunos bots detectan. */
+.lcrm-hp {
+	position: absolute !important;
+	left: -9999px !important;
+	width: 1px; height: 1px; overflow: hidden;
+}

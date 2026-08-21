@@ -1,0 +1,14 @@
+{
+  "name": "lucuma/wp-crm-inmobiliario",
+  "description": "Conector de WordPress para el Lucuma CRM Inmobiliario",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=7.4",
+    "woocommerce/action-scheduler": "^3.8"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "allow-plugins": { "composer/installers": true }
+  }
+}
