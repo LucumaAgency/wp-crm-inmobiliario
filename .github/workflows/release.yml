@@ -1,0 +1,41 @@
+name: Release
+
+# Genera el zip instalable en cada tag v*. El plugin no está en el repositorio de
+# WordPress, así que este zip es la vía de distribución e instalación en los clientes.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          tools: composer
+
+      - name: Lint de PHP
+        run: find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 php -l
+
+      - name: Instalar dependencias (Action Scheduler)
+        run: composer install --no-dev --optimize-autoloader --no-interaction
+
+      - name: Armar el zip
+        run: |
+          NOMBRE=lucuma-crm-conector
+          mkdir -p build/$NOMBRE
+          rsync -a --exclude='.git*' --exclude='build' --exclude='composer.*' \
+                --exclude='*.md' --exclude='.github' ./ build/$NOMBRE/
+          cd build && zip -qr ../$NOMBRE.zip $NOMBRE
+
+      - name: Publicar release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: lucuma-crm-conector.zip
+          generate_release_notes: true
