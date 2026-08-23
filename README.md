@@ -4,8 +4,25 @@ Renderiza en el sitio los formularios definidos en el [Lucuma CRM](https://githu
 y envía los leads. Con cola de reintentos y correo de respaldo: **si el CRM no responde, no se
 pierde ningún lead**.
 
-> Estado: **Fase 1.** Shortcode operativo. El elemento nativo de Bricks y el bloque de
-> Gutenberg vienen después y reutilizan el mismo render.
+> Estado: **Fase 1.** Cuatro formas de insertar el formulario, todas sobre el mismo render:
+> shortcode, bloque de Gutenberg, elemento nativo de Bricks y widget de Elementor.
+
+## Cómo se inserta el formulario
+
+| Vía | Cuándo | Requiere |
+|---|---|---|
+| **Bloque de Gutenberg** | cualquier WordPress, editor de bloques | nada |
+| **Elemento de Bricks** | sitios hechos con Bricks | Bricks activo |
+| **Widget de Elementor** | sitios hechos con Elementor | Elementor activo |
+| **Shortcode** `[lucuma_crm_form id="…"]` | cualquier sitio, cualquier constructor | nada |
+
+Los cuatro pasan por `LCRM_Embed`, así que comparten caché, encolado de assets y avisos: si
+el render cambia, cambia para todos a la vez. Las integraciones con constructores se cargan
+**solo si el constructor está activo**; el plugin no depende de ninguno.
+
+En los tres editores el formulario se elige de una **lista traída del CRM**, nunca escribiendo
+el ID a mano, y se muestra una vista previa real con la interacción bloqueada: dentro del
+editor un envío accidental crearía un lead de verdad.
 
 ## Qué hace, y qué no
 
@@ -129,5 +146,5 @@ píxeles y eventos de conversión del propio sitio.
 
 ## Pendiente
 
-Elemento nativo de Bricks, bloque de Gutenberg, modo transición para formularios de Bricks ya
+Modo transición para formularios de Bricks ya
 existentes, y widget de disponibilidad de unidades.

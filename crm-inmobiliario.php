@@ -34,12 +34,14 @@ require_once LCRM_PATH . 'includes/class-settings.php';
 require_once LCRM_PATH . 'includes/class-api-client.php';
 require_once LCRM_PATH . 'includes/class-form-cache.php';
 require_once LCRM_PATH . 'includes/class-renderer.php';
+require_once LCRM_PATH . 'includes/class-embed.php';
 require_once LCRM_PATH . 'includes/class-queue.php';
 require_once LCRM_PATH . 'includes/class-scheduler.php';
 require_once LCRM_PATH . 'includes/class-backup-mail.php';
 require_once LCRM_PATH . 'includes/class-submit-endpoint.php';
 require_once LCRM_PATH . 'includes/class-admin-queue.php';
 require_once LCRM_PATH . 'includes/class-shortcode.php';
+require_once LCRM_PATH . 'includes/class-block.php';
 
 /**
  * Arranque.
@@ -50,6 +52,39 @@ function lcrm_init() {
 		new LCRM_Admin_Queue();
 	}
 	new LCRM_Shortcode();
+	new LCRM_Block();
+
+	// Los assets se registran siempre y se encolan solo cuando se pinta un formulario.
+	add_action( 'wp_enqueue_scripts', array( 'LCRM_Embed', 'registrar_assets' ) );
+
+	/**
+	 * Integraciones con constructores.
+	 *
+	 * Se cargan solo si el constructor está activo: el plugin no depende de ninguno y
+	 * funciona en un WordPress a secas con el bloque o el shortcode.
+	 */
+	add_action(
+		'init',
+		function () {
+			if ( class_exists( '\\Bricks\\Elements' ) ) {
+				require_once LCRM_PATH . 'includes/class-bricks-element.php';
+				if ( class_exists( 'LCRM_Bricks_Element' ) ) {
+					\Bricks\Elements::register_element( LCRM_PATH . 'includes/class-bricks-element.php' );
+				}
+			}
+		},
+		11
+	);
+
+	add_action(
+		'elementor/widgets/register',
+		function ( $registrador ) {
+			require_once LCRM_PATH . 'includes/class-elementor-widget.php';
+			if ( class_exists( 'LCRM_Elementor_Widget' ) ) {
+				$registrador->register( new LCRM_Elementor_Widget() );
+			}
+		}
+	);
 	new LCRM_Submit_Endpoint();
 	LCRM_Scheduler::init();
 }
