@@ -16,8 +16,48 @@ class LCRM_API_Client {
 	 *
 	 * @return string
 	 */
+	/**
+	 * Ajustes en uso para esta llamada.
+	 *
+	 * Normalmente son los guardados. La prueba de conexión los sustituye por lo que hay
+	 * escrito en pantalla, para que el botón compruebe lo que la persona acaba de teclear
+	 * y no lo que había guardado antes: probar los valores viejos y decir que fallan es
+	 * exactamente lo que despista.
+	 *
+	 * @var array|null
+	 */
+	private static $override = null;
+
+	/**
+	 * Usa estos ajustes en vez de los guardados hasta que se llame a `olvidar_ajustes()`.
+	 *
+	 * @param array $ajustes Ajustes.
+	 */
+	public static function usar_ajustes( $ajustes ) {
+		self::$override = is_array( $ajustes ) ? $ajustes : null;
+	}
+
+	/** Vuelve a los ajustes guardados. */
+	public static function olvidar_ajustes() {
+		self::$override = null;
+	}
+
+	/**
+	 * Un ajuste, mirando primero el override de la prueba de conexión.
+	 *
+	 * @param string $clave Clave.
+	 * @param string $def   Valor por defecto.
+	 * @return string
+	 */
+	private static function ajuste( $clave, $def = '' ) {
+		if ( null !== self::$override && isset( self::$override[ $clave ] ) && '' !== self::$override[ $clave ] ) {
+			return self::$override[ $clave ];
+		}
+		return lcrm_setting( $clave, $def );
+	}
+
 	private static function base() {
-		return untrailingslashit( lcrm_setting( 'api_base', '' ) ) . '/api/v1/public';
+		return untrailingslashit( self::ajuste( 'api_base', '' ) ) . '/api/v1/public';
 	}
 
 	/**
@@ -27,7 +67,7 @@ class LCRM_API_Client {
 	 * @return array { ok: bool, code: int, body: mixed }
 	 */
 	public static function get_private( $path ) {
-		return self::request( 'GET', $path, null, array( 'X-LCRM-Secret' => lcrm_setting( 'secret_key' ) ) );
+		return self::request( 'GET', $path, null, array( 'X-LCRM-Secret' => self::ajuste( 'secret_key' ) ) );
 	}
 
 	/**
@@ -37,7 +77,7 @@ class LCRM_API_Client {
 	 * @return array
 	 */
 	public static function get_public( $path ) {
-		return self::request( 'GET', $path, null, array( 'X-LCRM-Key' => lcrm_setting( 'public_key' ) ) );
+		return self::request( 'GET', $path, null, array( 'X-LCRM-Key' => self::ajuste( 'public_key' ) ) );
 	}
 
 	/**
@@ -52,7 +92,7 @@ class LCRM_API_Client {
 			'POST',
 			'/forms/' . rawurlencode( $form_id ) . '/submissions',
 			self::normalizar( $payload ),
-			array( 'X-LCRM-Key' => lcrm_setting( 'public_key' ) ),
+			array( 'X-LCRM-Key' => self::ajuste( 'public_key' ) ),
 			8 // Timeout corto: el visitante no puede quedarse esperando.
 		);
 	}
@@ -100,7 +140,7 @@ class LCRM_API_Client {
 	 * @return array
 	 */
 	public static function test() {
-		$base = untrailingslashit( lcrm_setting( 'api_base', '' ) );
+		$base = untrailingslashit( self::ajuste( 'api_base', '' ) );
 		if ( ! $base ) {
 			return array( 'ok' => false, 'message' => 'Falta la URL del CRM.' );
 		}

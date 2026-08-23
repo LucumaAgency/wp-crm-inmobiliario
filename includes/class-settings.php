@@ -81,7 +81,29 @@ class LCRM_Settings {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => 'Sin permisos.' ) );
 		}
+		/**
+		 * Se prueba lo que hay escrito en pantalla, no lo guardado.
+		 *
+		 * Antes el botón solo mandaba la acción y el nonce, así que comprobaba los ajustes
+		 * anteriores: quien corregía la URL y pulsaba "Probar" seguía viendo el error del
+		 * valor viejo, sin ninguna pista de que faltaba guardar.
+		 *
+		 * La secret key se muestra enmascarada; si no se ha escrito una nueva, llega el
+		 * texto con puntos y se ignora para usar la guardada.
+		 */
+		$en_pantalla = array(
+			'api_base'   => isset( $_POST['api_base'] ) ? esc_url_raw( trim( wp_unslash( $_POST['api_base'] ) ) ) : '',
+			'public_key' => isset( $_POST['public_key'] ) ? sanitize_text_field( wp_unslash( $_POST['public_key'] ) ) : '',
+			'secret_key' => isset( $_POST['secret_key'] ) ? sanitize_text_field( wp_unslash( $_POST['secret_key'] ) ) : '',
+		);
+		if ( false !== strpos( $en_pantalla['secret_key'], '•' ) ) {
+			$en_pantalla['secret_key'] = '';
+		}
+
+		LCRM_API_Client::usar_ajustes( $en_pantalla );
 		$res = LCRM_API_Client::test();
+		LCRM_API_Client::olvidar_ajustes();
+
 		if ( empty( $res['ok'] ) ) {
 			wp_send_json_error( $res );
 		}
@@ -241,6 +263,13 @@ class LCRM_Settings {
 				var data = new URLSearchParams();
 				data.append( 'action', 'lcrm_test' );
 				data.append( 'nonce', nonce );
+
+				// Se envía lo que hay escrito ahora mismo: el botón comprueba lo que la
+				// persona ve, no lo que quedó guardado la última vez.
+				[ 'api_base', 'public_key', 'secret_key' ].forEach( function ( k ) {
+					var campo = document.querySelector( '[name="<?php echo esc_js( LCRM_OPTION ); ?>[' + k + ']"]' );
+					if ( campo ) { data.append( k, campo.value ); }
+				} );
 
 				fetch( ajaxurl, { method: 'POST', credentials: 'same-origin', body: data } )
 					.then( function ( r ) { return r.json(); } )
