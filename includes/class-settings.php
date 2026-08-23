@@ -142,7 +142,7 @@ class LCRM_Settings {
 				<table class="form-table" role="presentation">
 					<tr>
 						<th scope="row">URL del CRM</th>
-						<td><?php $this->campo( 'api_base', 'https://crm.lucuma.agency' ); ?>
+						<td><?php $this->campo( 'api_base', 'https://tu-cliente.crmlucuma.com' ); ?>
 							<p class="description">Sin <code>/api</code> al final. El plugin arma la ruta.</p></td>
 					</tr>
 					<tr>

@@ -100,7 +100,10 @@ function lcrm_activate() {
 		add_option(
 			LCRM_OPTION,
 			array(
-				'api_base'      => 'https://crm.lucuma.agency',
+				// Vacío a propósito: un valor por defecto apuntando a un dominio concreto
+				// hace que el plugin parezca configurado cuando no lo está, y el fallo
+				// aparece como un «Could not resolve host» que despista a quien lo instala.
+				'api_base'      => '',
 				'public_key'    => '',
 				'secret_key'    => '',
 				'notify_emails' => get_option( 'admin_email' ),
