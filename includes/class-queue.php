@@ -138,6 +138,32 @@ class LCRM_Queue {
 	 * @param object $fila  Fila.
 	 * @param string $error Error.
 	 */
+	/**
+	 * Marca un envío como fallido definitivo, sin más reintentos.
+	 *
+	 * Para los rechazos por datos inválidos (400): reintentar no los arregla, y seguir
+	 * intentándolo seis veces solo retrasa el aviso al administrador. La fila **no se
+	 * borra**: puede contener un lead que nunca llegó al CRM.
+	 *
+	 * @param object $fila  Fila de la cola.
+	 * @param string $error Motivo.
+	 */
+	public static function mark_failed( $fila, $error ) {
+		global $wpdb;
+		$wpdb->update( // phpcs:ignore WordPress.DB
+			self::table(),
+			array(
+				'status'     => self::ESTADO_FALLIDO,
+				'attempts'   => (int) $fila->attempts + 1,
+				'last_error' => substr( $error, 0, 1000 ),
+			),
+			array( 'id' => $fila->id ),
+			array( '%s', '%d', '%s' ),
+			array( '%d' )
+		);
+		self::avisar_al_admin( $fila, $error );
+	}
+
 	public static function mark_failed_attempt( $fila, $error ) {
 		global $wpdb;
 		$intentos = (int) $fila->attempts + 1;

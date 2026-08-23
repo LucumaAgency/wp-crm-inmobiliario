@@ -126,9 +126,11 @@ class LCRM_Scheduler {
 				continue;
 			}
 
-			// Un 400 no se arregla reintentando: son datos inválidos.
+			// Un 400 no se arregla reintentando: son datos inválidos. Se marca fallido de
+			// inmediato en vez de repetir el mismo error seis veces, que solo retrasaría
+			// el aviso al administrador.
 			if ( 400 === $res['code'] ) {
-				LCRM_Queue::mark_failed_attempt( $fila, 'Rechazado por el CRM (400): ' . self::texto( $res['body'] ) );
+				LCRM_Queue::mark_failed( $fila, 'Rechazado por el CRM (400): ' . self::texto( $res['body'] ) );
 				continue;
 			}
 

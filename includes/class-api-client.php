@@ -51,10 +51,47 @@ class LCRM_API_Client {
 		return self::request(
 			'POST',
 			'/forms/' . rawurlencode( $form_id ) . '/submissions',
-			$payload,
+			self::normalizar( $payload ),
 			array( 'X-LCRM-Key' => lcrm_setting( 'public_key' ) ),
 			8 // Timeout corto: el visitante no puede quedarse esperando.
 		);
+	}
+
+	/**
+	 * Deja el payload con la forma que espera el CRM antes de serializarlo.
+	 *
+	 * En PHP un array vacío se convierte en `[]`, no en `{}`. El esquema del CRM declara
+	 * `attribution`, `antispam`, `consent` y `values` como **objetos**, así que un visitante
+	 * sin UTMs hacía que `attribution` viajara como `[]` y el CRM devolviera 400. Peor aún:
+	 * el envío quedaba en la cola y cada reintento repetía el mismo error, porque al releer
+	 * la cola el JSON se decodifica otra vez a array.
+	 *
+	 * Por eso la corrección vive aquí y no en el endpoint: es el único punto por el que
+	 * salen los envíos, vengan del visitante o de la cola.
+	 *
+	 * @param array $payload Cuerpo.
+	 * @return array
+	 */
+	private static function normalizar( $payload ) {
+		foreach ( array( 'values', 'consent', 'attribution', 'antispam' ) as $clave ) {
+			if ( ! isset( $payload[ $clave ] ) ) {
+				continue;
+			}
+			if ( is_array( $payload[ $clave ] ) ) {
+				$payload[ $clave ] = (object) $payload[ $clave ];
+			}
+		}
+
+		// `first` y `last` de la atribución son objetos anidados, con el mismo problema.
+		if ( isset( $payload['attribution'] ) && is_object( $payload['attribution'] ) ) {
+			foreach ( array( 'first', 'last' ) as $nivel ) {
+				if ( isset( $payload['attribution']->$nivel ) && is_array( $payload['attribution']->$nivel ) ) {
+					$payload['attribution']->$nivel = (object) $payload['attribution']->$nivel;
+				}
+			}
+		}
+
+		return $payload;
 	}
 
 	/**
