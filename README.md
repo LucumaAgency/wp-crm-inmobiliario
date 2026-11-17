@@ -39,6 +39,23 @@ teléfono, y eso se rompía cada vez que alguien tocaba el formulario. Aquí **e
 define en el CRM**, y cada campo declara qué *es* (`semantic`). El plugin solo dibuja lo que le
 dicen. No hay nada que mapear ni que se pueda desincronizar.
 
+## Formularios de Bricks ya hechos (0.2.0)
+
+Para sitios con formularios nativos de Bricks que no conviene rehacer (diseño, IDs para GTM,
+acciones propias): se les agrega la acción **Custom** y en **Ajustes → Lucuma CRM →
+Formularios de Bricks** se escribe una línea por formulario: `idDeBricks = idDelCRM`.
+
+- El **ID de cada campo en Bricks es la clave del campo en el CRM** (`email`, `phone`, `plan`…).
+  No hay mapeo campo por campo.
+- Un campo `name` se parte en `fname` y `lname`.
+- Los campos que el CRM no conoce se agregan, con su etiqueta, al campo de mensaje.
+- «Prefijo de país» completa los teléfonos escritos sin «+» (1 = EE. UU.).
+- Si el CRM no responde: cola con la misma clave de idempotencia + correo de respaldo. Si
+  responde 400, queda como fallido en la cola. El visitante siempre ve el éxito de Bricks.
+
+Configuración por REST (administradores): `GET/POST /wp-json/lucuma-crm/v1/config` con
+`api_base`, `public_key`, `secret_key`, `bricks_forms`, `phone_prefix`, `notify_emails`.
+
 ## Instalación
 
 1. Subir el plugin y activarlo.

@@ -3,7 +3,7 @@
  * Plugin Name:       Lucuma CRM — Conector
  * Plugin URI:        https://github.com/LucumaAgency/wp-crm-inmobiliario
  * Description:       Renderiza en el sitio los formularios definidos en el Lucuma CRM y envía los leads. Con cola de reintentos y correo de respaldo: si el CRM no responde, no se pierde ningún lead.
- * Version:           0.1.0
+ * Version:           0.2.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Lucuma Agency
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'LCRM_VERSION', '0.1.0' );
+define( 'LCRM_VERSION', '0.2.0' );
 define( 'LCRM_FILE', __FILE__ );
 define( 'LCRM_PATH', plugin_dir_path( __FILE__ ) );
 define( 'LCRM_URL', plugin_dir_url( __FILE__ ) );
@@ -42,6 +42,8 @@ require_once LCRM_PATH . 'includes/class-submit-endpoint.php';
 require_once LCRM_PATH . 'includes/class-admin-queue.php';
 require_once LCRM_PATH . 'includes/class-shortcode.php';
 require_once LCRM_PATH . 'includes/class-block.php';
+require_once LCRM_PATH . 'includes/class-bricks-native.php';
+require_once LCRM_PATH . 'includes/class-config-endpoint.php';
 
 /**
  * Arranque.
@@ -86,6 +88,8 @@ function lcrm_init() {
 		}
 	);
 	new LCRM_Submit_Endpoint();
+	LCRM_Bricks_Native::init();
+	LCRM_Config_Endpoint::init();
 	LCRM_Scheduler::init();
 }
 add_action( 'plugins_loaded', 'lcrm_init' );

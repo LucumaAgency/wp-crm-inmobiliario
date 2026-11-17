@@ -53,6 +53,8 @@ class LCRM_Settings {
 			'cache_ttl'                => max( 60, (int) ( isset( $input['cache_ttl'] ) ? $input['cache_ttl'] : 900 ) ),
 			'debug'                    => ! empty( $input['debug'] ) ? '1' : '0',
 			'delete_data_on_uninstall' => ! empty( $input['delete_data_on_uninstall'] ) ? '1' : '0',
+			'bricks_forms'             => sanitize_textarea_field( isset( $input['bricks_forms'] ) ? $input['bricks_forms'] : '' ),
+			'phone_prefix'             => preg_replace( '/\D/', '', isset( $input['phone_prefix'] ) ? (string) $input['phone_prefix'] : '' ),
 		);
 
 		// La secret key solo se reemplaza si se escribió una nueva: el campo se muestra
@@ -186,6 +188,26 @@ class LCRM_Settings {
 					<span id="lcrm-test-status" style="margin-left:8px;"></span>
 				</p>
 				<div id="lcrm-test-result"></div>
+
+				<h2>Formularios de Bricks</h2>
+				<p>Para formularios que ya existen en Bricks: agrégales la acción <strong>Custom</strong> y escribe aquí
+					una línea por formulario. El ID de cada campo en Bricks debe ser la clave del campo en el CRM
+					(<code>email</code>, <code>phone</code>…); un campo <code>name</code> se parte en nombre y apellido, y los
+					que el CRM no conoce se agregan al mensaje.</p>
+				<table class="form-table" role="presentation">
+					<tr>
+						<th scope="row">Formularios</th>
+						<td>
+							<textarea class="large-text code" rows="4" name="<?php echo esc_attr( LCRM_OPTION ); ?>[bricks_forms]" placeholder="abcfrm = clx123..."><?php echo esc_textarea( lcrm_setting( 'bricks_forms', '' ) ); ?></textarea>
+							<p class="description"><code>id del elemento de Bricks = id del formulario del CRM</code>. El id del CRM sale en «Probar conexión».</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">Prefijo de país</th>
+						<td><?php $this->campo( 'phone_prefix', '1' ); ?>
+							<p class="description">Se agrega a los teléfonos escritos sin «+» (1 = EE. UU.). Vacío: el CRM los toma como peruanos.</p></td>
+					</tr>
+				</table>
 
 				<h2>Correo de respaldo</h2>
 				<table class="form-table" role="presentation">
